@@ -313,7 +313,7 @@ const ProjectDetail = () => {
             {project.tags?.length > 0 && (
               <div className="mt-5 flex flex-wrap gap-2">
                 {project.tags.map((tag) => (
-                  <Link key={tag} to={`/projects?tag=${encodeURIComponent(tag)}`}>
+                  <Link key={tag} href={`/projects?tag=${encodeURIComponent(tag)}`}>
                     <Badge>{tag}</Badge>
                   </Link>
                 ))}
