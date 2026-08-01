@@ -1,0 +1,34 @@
+# Supabase CLI configuration.
+# Docs: https://supabase.com/docs/guides/cli/config
+#
+# `project_id` is a local label for the CLI, not a secret.
+# Link to a hosted project with:
+#   npx supabase link --project-ref <your-project-ref>
+
+project_id = "edubuild"
+
+[db]
+# Must match the major version of the hosted Supabase project so that
+# `supabase db push --dry-run` produces an accurate diff.
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[api]
+enabled = true
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[studio]
+enabled = true
+
+# Supabase Auth is intentionally disabled.
+#
+# Authentication is handled by the Express backend with its own JWT and the
+# edubuild_users table. Enabling Supabase Auth would create a second, competing
+# source of identity. See the root README for the rationale.
+[auth]
+enabled = false

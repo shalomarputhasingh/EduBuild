@@ -1,0 +1,44 @@
+node_modules/
+dist/
+dist-ssr/
+build/
+
+# Environment — only the example files are tracked
+.env
+.env.*
+!.env.example
+
+*.local
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs and captured console output
+*.log
+npm-debug.log*
+yarn-error.log*
+frontend_log.txt
+debug_output.txt
+test-output.txt
+tables.txt
+tables_utf8.txt
+
+# Local database dumps
+*.dump
+*.sql.gz
+
+# Supabase CLI local state
+supabase/.branches/
+supabase/.temp/
+
+# Agent tooling and planning artifacts — not part of the product
+.hermes/
+AGENTS.md
+AGENTS.local.md
+**/AGENTS.md
+CLAUDE.md
+**/CLAUDE.md
+.claude/
+plans/
+*.plan.md
