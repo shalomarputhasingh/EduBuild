@@ -43,6 +43,20 @@ export const viewport = {
   initialScale: 1,
 };
 
+/**
+ * Every route renders per request.
+ *
+ * The CSP carries a per-request nonce (see middleware.js), and Next can only
+ * stamp that onto its inline bootstrap scripts while it is rendering. A page
+ * served from the build-time prerender has HTML that predates the nonce, so its
+ * scripts go out unsigned, the browser blocks them, and the page never
+ * hydrates — which showed up as the sign-in form spinning forever.
+ *
+ * The cost is small here: every page is a client component that fetches its own
+ * data after mount, so the prerendered HTML was only ever an empty shell.
+ */
+export const dynamic = 'force-dynamic';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
