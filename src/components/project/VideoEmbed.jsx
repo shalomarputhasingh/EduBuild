@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 
 /**
@@ -20,8 +22,8 @@ const VideoEmbed = ({ videoId, videoTitle, videoChannel, videoThumbnail, videoUr
   const watchUrl = videoUrl || `https://www.youtube.com/watch?v=${videoId}`;
 
   return (
-    <div className="overflow-hidden rounded-card border border-slate-200 bg-white shadow-card">
-      <div className="relative aspect-video bg-slate-900">
+    <div className="overflow-hidden rounded-card border border-surface-line bg-white shadow-card">
+      <div className="relative aspect-video bg-board">
         {playing ? (
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`}

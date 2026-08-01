@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Button from './Button';
 
@@ -39,7 +41,7 @@ const Pagination = ({ page, totalPages, onPageChange, className = '' }) => {
                 className={`h-9 min-w-[2.25rem] rounded-lg px-3 text-sm font-semibold transition-colors ${
                   p === page
                     ? 'bg-brand-600 text-white'
-                    : 'text-ink-muted hover:bg-slate-100 hover:text-ink'
+                    : 'text-ink-muted hover:bg-surface-sunken hover:text-ink'
                 }`}
               >
                 {p}

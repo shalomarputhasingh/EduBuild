@@ -1,5 +1,7 @@
+'use client';
+
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { fetchProjects } from '../services/api';
 import { errorMessage } from '../api/axios';
 
@@ -32,11 +34,44 @@ export const DEFAULT_FILTERS = {
 const SEARCH_DEBOUNCE_MS = 350;
 
 export const useProjects = ({ pageSize = 12 } = {}) => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  /**
+   * Next's useSearchParams is read-only — there is no setSearchParams. Writes
+   * go back through the router, which is also what keeps the URL, the back
+   * button and the rendered result in step.
+   *
+   * `scroll: false` on a replace stops the page jumping to the top every time a
+   * filter changes; setPage opts back into scrolling deliberately.
+   */
+  const writeParams = useCallback(
+    (mutate, { replace = true } = {}) => {
+      const next = new URLSearchParams(searchParams.toString());
+      mutate(next);
+      const query = next.toString();
+      const url = query ? `${pathname}?${query}` : pathname;
+      if (replace) router.replace(url, { scroll: false });
+      else router.push(url, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
   const [result, setResult] = useState({ data: [], page: 1, limit: pageSize, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  /**
+   * Bumped to re-run the fetch without changing the URL.
+   *
+   * Retry used to be expressed as a no-op rewrite of the search params, which
+   * relied on React Router handing back a new object every time. Under Next
+   * that would either be a genuine no-op or an unwanted history entry, so the
+   * intent is now explicit.
+   */
+  const [reloadToken, setReloadToken] = useState(0);
+  const refetch = useCallback(() => setReloadToken((n) => n + 1), []);
 
   // Keeps typing responsive while the request is debounced behind it.
   const [searchInput, setSearchInput] = useState(() => searchParams.get('search') || '');
@@ -53,41 +88,36 @@ export const useProjects = ({ pageSize = 12 } = {}) => {
 
   const setFilter = useCallback(
     (key, value) => {
-      setSearchParams(
-        (previous) => {
-          const next = new URLSearchParams(previous);
-          if (value === '' || value == null || value === 'All') next.delete(key);
-          else next.set(key, String(value));
-          // Any filter change invalidates the current page number.
-          if (key !== 'page') next.delete('page');
-          return next;
-        },
-        { replace: true }
-      );
+      writeParams((next) => {
+        if (value === '' || value == null || value === 'All') next.delete(key);
+        else next.set(key, String(value));
+        // Any filter change invalidates the current page number.
+        if (key !== 'page') next.delete('page');
+      });
     },
-    [setSearchParams]
+    [writeParams]
   );
 
   const setPage = useCallback(
     (page) => {
-      setSearchParams(
-        (previous) => {
-          const next = new URLSearchParams(previous);
+      writeParams(
+        (next) => {
           if (page <= 1) next.delete('page');
           else next.set('page', String(page));
-          return next;
         },
         { replace: false }
       );
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    [setSearchParams]
+    [writeParams]
   );
 
   const resetFilters = useCallback(() => {
     setSearchInput('');
-    setSearchParams(new URLSearchParams(), { replace: true });
-  }, [setSearchParams]);
+    writeParams((next) => {
+      for (const key of [...next.keys()]) next.delete(key);
+    });
+  }, [writeParams]);
 
   // Debounce only the text input; every other filter applies immediately.
   useEffect(() => {
@@ -124,7 +154,7 @@ export const useProjects = ({ pageSize = 12 } = {}) => {
       });
 
     return () => controller.abort();
-  }, [filters, pageSize]);
+  }, [filters, pageSize, reloadToken]);
 
   const activeFilterCount = useMemo(
     () =>
@@ -148,7 +178,7 @@ export const useProjects = ({ pageSize = 12 } = {}) => {
     setPage,
     resetFilters,
     activeFilterCount,
-    refetch: () => setSearchParams((p) => new URLSearchParams(p), { replace: true }),
+    refetch,
   };
 };
 

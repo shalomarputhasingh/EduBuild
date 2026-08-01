@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 
 const formatCost = (value) =>
@@ -12,17 +14,27 @@ const formatCost = (value) =>
  */
 const MaterialsChecklist = ({ materials = [], projectId }) => {
   const storageKey = `edubuild.checklist.${projectId}`;
-  const [checked, setChecked] = useState(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem(storageKey) || '[]'));
-    } catch {
-      return new Set();
-    }
-  });
+
+  // Empty on the server, restored after mount — see LanguageContext for why
+  // reading storage during the first render is not an option here.
+  const [checked, setChecked] = useState(() => new Set());
+  const [restored, setRestored] = useState(false);
 
   useEffect(() => {
+    try {
+      setChecked(new Set(JSON.parse(localStorage.getItem(storageKey) || '[]')));
+    } catch {
+      setChecked(new Set());
+    }
+    setRestored(true);
+  }, [storageKey]);
+
+  useEffect(() => {
+    // Do not write before the restore has run, or the first render's empty set
+    // would overwrite what the teacher had already ticked.
+    if (!restored) return;
     localStorage.setItem(storageKey, JSON.stringify([...checked]));
-  }, [checked, storageKey]);
+  }, [checked, storageKey, restored]);
 
   const toggle = (name) => {
     setChecked((current) => {
@@ -42,7 +54,7 @@ const MaterialsChecklist = ({ materials = [], projectId }) => {
 
   return (
     <div>
-      <ul className="divide-y divide-slate-100">
+      <ul className="divide-y divide-surface-line">
         {materials.map((material, index) => {
           const isChecked = checked.has(material.name);
           const inputId = `material-${projectId}-${index}`;
@@ -54,7 +66,7 @@ const MaterialsChecklist = ({ materials = [], projectId }) => {
                 type="checkbox"
                 checked={isChecked}
                 onChange={() => toggle(material.name)}
-                className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-brand-600 focus:ring-brand-600"
+                className="mt-1 h-4 w-4 shrink-0 rounded border-surface-line text-brand-600 focus:ring-brand-600"
               />
               <label htmlFor={inputId} className="flex-1 cursor-pointer">
                 <span
@@ -85,7 +97,7 @@ const MaterialsChecklist = ({ materials = [], projectId }) => {
       </ul>
 
       {priced.length > 0 && (
-        <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+        <div className="mt-3 flex items-center justify-between border-t border-surface-line pt-3">
           <span className="text-sm font-medium text-ink">
             Estimated total
             {priced.length < materials.length && (

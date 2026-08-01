@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface-sunken text-ink font-sans antialiased;
+    /* Nothing should ever make the page scroll sideways on a phone. If a child
+       overflows, it is a bug to fix at the source — this stops it becoming a
+       whole-page horizontal scrollbar in the meantime. */
+    overflow-x: hidden;
+  }
+
+  /* Long unbroken strings — model ids like
+     "meta-llama/llama-3.3-70b-instruct:free", API key hints, URLs — are the
+     usual cause of horizontal overflow inside a narrow card. */
+  code, .break-anywhere {
+    overflow-wrap: anywhere;
+  }
+
+  /* Headings wrap rather than forcing a container wider than the viewport. */
+  h1, h2, h3 {
+    overflow-wrap: break-word;
+  }
+
+  /* A visible focus ring on every interactive element, declared once, so no
+     component can quietly drop keyboard affordance. `focus-visible` keeps it
+     off for mouse users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-brand-600 ring-offset-2 ring-offset-surface-sunken;
+  }
+
+  /* Headings carry the display face; body copy never does. */
+  h1, h2, h3, h4 {
+    @apply font-display font-bold tracking-tight text-ink;
+  }
+
+  /* Figures line up in a column when they are stacked in a table or a card. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Respect a reduced-motion preference rather than animating regardless. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Keyboard users land here first and can jump past the navigation. */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50
+           focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-semibold
+           focus:text-brand-700 focus:shadow-card-hover;
+  }
+
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Wide content — tables, diagrams, code — scrolls inside itself rather than
+     making the whole page scroll sideways on a phone. */
+  .scroll-x {
+    @apply -mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0;
+  }
+
+  .prose-guide {
+    @apply leading-relaxed text-ink-muted;
+  }
+  .prose-guide p + p {
+    @apply mt-3;
+  }
+
+  /* ── The chalkboard ────────────────────────────────────────────────────────
+     A dark board-green field with a faint chalk grid ruled across it. Used for
+     the home hero and the footer. Text on it must be chalk-white or marigold;
+     `ink` tokens are unreadable here. */
+  .chalkboard {
+    @apply relative isolate overflow-hidden bg-board text-white;
+  }
+  /* A ruled chalk grid is the only texture on the board. There was a soft
+     radial light here too; it was removed because the grid already keeps the
+     panel from reading as a dead rectangle, and a glow encodes nothing about
+     the content. A real blackboard is a flat field. */
+  .chalkboard::before {
+    content: '';
+    @apply pointer-events-none absolute inset-0 -z-10 bg-grid-chalk bg-grid-cell;
+  }
+
+  /* The workbench: the same grid, on paper, for the sections between boards. */
+  .workbench {
+    @apply bg-surface-sunken bg-grid bg-grid-cell;
+  }
+
+  /* ── The spec strip ───────────────────────────────────────────────────────
+     The signature device. A monospace run of a build's real parameters —
+     class, subject, cost, duration — set like the title block on an
+     engineering drawing. It appears identically on every card, on the detail
+     hero, and on the home stats, so a teacher learns to read one row and know
+     what they are looking at. */
+  .spec {
+    @apply flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs font-medium uppercase tracking-wider;
+    font-variant-numeric: tabular-nums;
+  }
+  .spec > * + *::before {
+    content: '·';
+    @apply mr-2 text-current opacity-40;
+  }
+
+  /* A label above a heading. Mono, so it reads as a system label rather than
+     as more prose. */
+  .eyebrow {
+    @apply font-mono text-xs font-medium uppercase tracking-[0.18em];
+  }
+
+  /* ── The chalk underline ──────────────────────────────────────────────────
+     One phrase in the hero headline gets a marigold stroke drawn under it, as
+     if underlined on the board. Used once per page, never more. */
+  .chalk-underline {
+    @apply relative inline-block;
+  }
+  .chalk-underline::after {
+    content: '';
+    @apply absolute inset-x-0 -bottom-1 h-[3px] origin-left rounded-full bg-marigold;
+    @apply animate-draw-underline;
+  }
+
+  /* Cards sit on the grid as solid objects, covering it. */
+  .card {
+    @apply rounded-card border border-surface-line bg-white shadow-card;
+  }
+
+  /**
+   * Icon-only controls — clear search, voice, reorder, menu, pagination arrows —
+   * are around 26px, which is comfortable with a mouse and too small for a
+   * fingertip. This grows them to the 44px touch minimum only where the primary
+   * input is coarse, so pointer devices keep the compact layout.
+   */
+  @media (pointer: coarse) {
+    .tap-target {
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+    }
+  }
+}

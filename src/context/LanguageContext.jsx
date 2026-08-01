@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { translations } from '../data/translations';
 
@@ -12,12 +14,21 @@ export const LANGUAGES = [
 const STORAGE_KEY = 'edubuild.language';
 
 export const LanguageProvider = ({ children }) => {
-  // Persisted, so a teacher who reads Telugu is not reset to English on every
-  // page load — which is what the previous useState('en') did.
-  const [language, setLanguageState] = useState(() => {
+  /**
+   * Starts at English and adopts the stored choice after mount.
+   *
+   * Reading localStorage in the initialiser ran on the server during
+   * prerendering, where it does not exist. Even behind a `typeof window` guard
+   * it would be wrong: the server would render English, the client would render
+   * Telugu, and the two would not match on hydration. Restoring in an effect
+   * keeps the first paint identical on both sides.
+   */
+  const [language, setLanguageState] = useState('en');
+
+  useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return LANGUAGES.some((l) => l.code === stored) ? stored : 'en';
-  });
+    if (LANGUAGES.some((l) => l.code === stored)) setLanguageState(stored);
+  }, []);
 
   const setLanguage = useCallback((code) => {
     setLanguageState(code);

@@ -1,30 +1,44 @@
 {
-  "name": "edubuild-frontend",
+  "name": "edubuild",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "node --test test/*.test.js",
+    "db:push": "supabase db push",
+    "db:diff": "supabase db push --dry-run",
+    "db:lint": "supabase db lint",
+    "promote-admin": "node scripts/promoteAdmin.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@tensorflow-models/mobilenet": "^2.1.1",
     "@tensorflow/tfjs": "^4.22.0",
     "axios": "^1.4.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
     "jspdf": "^4.1.0",
-    "leaflet": "^1.9.4",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-leaflet": "^4.2.1",
+    "next": "^16.2.12",
+    "openai": "^6.17.0",
+    "pg": "^8.11.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
-    "react-router-dom": "^7.18.2"
+    "sequelize": "^6.35.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.5",
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.25",
-    "tailwindcss": "^3.4.19",
-    "vite": "^8.2.0"
+    "supabase": "^2.111.0",
+    "tailwindcss": "^3.4.19"
+  },
+  "overrides": {
+    "postcss": "^8.5.25",
+    "sharp": "^0.35.3",
+    "uuid": "^11.1.1"
   }
 }

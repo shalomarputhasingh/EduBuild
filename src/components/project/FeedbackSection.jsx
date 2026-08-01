@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { getProjectFeedback, submitFeedback } from '../../services/api';
 import { errorMessage } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
@@ -15,7 +17,7 @@ const StarRating = ({ value, onChange, readOnly = false }) => (
         <span
           key={star}
           aria-hidden="true"
-          className={star <= value ? 'text-amber-500' : 'text-slate-300'}
+          className={star <= value ? 'text-marigold' : 'text-surface-line'}
         >
           ★
         </span>
@@ -27,7 +29,7 @@ const StarRating = ({ value, onChange, readOnly = false }) => (
           aria-label={`${star} ${star === 1 ? 'star' : 'stars'}`}
           aria-pressed={value === star}
           className={`rounded p-0.5 text-2xl transition-colors ${
-            star <= value ? 'text-amber-500' : 'text-slate-300 hover:text-amber-300'
+            star <= value ? 'text-marigold' : 'text-surface-line hover:text-marigold/60'
           }`}
         >
           ★
@@ -102,7 +104,7 @@ const FeedbackSection = ({ projectId }) => {
   return (
     <section
       id="reviews"
-      className="rounded-card border border-slate-200 bg-white p-6 shadow-card"
+      className="rounded-card border border-surface-line bg-white p-6 shadow-card"
     >
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-bold tracking-tight text-ink">
@@ -117,7 +119,7 @@ const FeedbackSection = ({ projectId }) => {
       </div>
 
       {isAuthenticated ? (
-        <form onSubmit={handleSubmit} className="mb-8 rounded-lg border border-slate-200 bg-surface-sunken p-5">
+        <form onSubmit={handleSubmit} className="mb-8 rounded-lg border border-surface-line bg-surface-sunken p-5">
           <h3 className="font-semibold text-ink">
             {myReview ? 'Update your review' : 'Have you tried this in class?'}
           </h3>
@@ -160,8 +162,8 @@ const FeedbackSection = ({ projectId }) => {
           </Button>
         </form>
       ) : (
-        <p className="mb-8 rounded-lg border border-slate-200 bg-surface-sunken px-4 py-3 text-sm text-ink-muted">
-          <Link to="/signin" className="font-semibold text-brand-700 hover:underline">
+        <p className="mb-8 rounded-lg border border-surface-line bg-surface-sunken px-4 py-3 text-sm text-ink-muted">
+          <Link href="/signin" className="font-semibold text-brand-700 hover:underline">
             Sign in
           </Link>{' '}
           to leave a review.
@@ -175,7 +177,7 @@ const FeedbackSection = ({ projectId }) => {
           No reviews yet. If you run this activity, your notes would help the next teacher.
         </p>
       ) : (
-        <ul className="divide-y divide-slate-100">
+        <ul className="divide-y divide-surface-line">
           {reviews.map((review) => (
             <li key={review.id} className="py-4">
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">

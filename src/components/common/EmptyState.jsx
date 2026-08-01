@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Button from './Button';
 
@@ -7,7 +9,7 @@ import Button from './Button';
  */
 const EmptyState = ({ icon = '📭', title, description, action, className = '' }) => (
   <div
-    className={`flex flex-col items-center justify-center rounded-card border border-dashed border-slate-300 bg-white px-6 py-16 text-center ${className}`}
+    className={`flex flex-col items-center justify-center rounded-card border border-dashed border-surface-line bg-white px-6 py-16 text-center ${className}`}
   >
     <div className="text-4xl" aria-hidden="true">
       {icon}

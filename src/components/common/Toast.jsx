@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 const ToastContext = createContext(null);
@@ -5,7 +7,7 @@ const ToastContext = createContext(null);
 const TONES = {
   success: 'bg-emerald-700 text-white',
   error: 'bg-red-700 text-white',
-  info: 'bg-slate-800 text-white',
+  info: 'bg-board text-white',
 };
 
 let nextId = 0;

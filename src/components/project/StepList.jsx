@@ -31,7 +31,7 @@ const StepList = ({ steps = [] }) => {
                 src={step.imageUrl}
                 alt={`Step ${index + 1}`}
                 loading="lazy"
-                className="mt-3 max-h-80 w-full rounded-lg border border-slate-200 object-cover"
+                className="mt-3 max-h-80 w-full rounded-lg border border-surface-line object-cover"
                 onError={(event) => {
                   event.currentTarget.style.display = 'none';
                 }}

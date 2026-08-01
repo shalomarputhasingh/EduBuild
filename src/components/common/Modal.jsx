@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useRef } from 'react';
 import Button from './Button';
 
@@ -64,7 +66,7 @@ const Modal = ({ open, onClose, title, description, children, footer, initialFoc
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center">
       <div
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-board/50 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -76,13 +78,13 @@ const Modal = ({ open, onClose, title, description, children, footer, initialFoc
         tabIndex={-1}
         className="relative w-full max-w-lg animate-fade-in rounded-card bg-white shadow-card-hover"
       >
-        <div className="border-b border-slate-200 p-5">
+        <div className="border-b border-surface-line p-5">
           <h2 className="text-lg font-semibold text-ink">{title}</h2>
           {description && <p className="mt-1 text-sm text-ink-muted">{description}</p>}
         </div>
         {children && <div className="p-5">{children}</div>}
         {footer && (
-          <div className="flex justify-end gap-3 border-t border-slate-200 p-5">{footer}</div>
+          <div className="flex justify-end gap-3 border-t border-surface-line p-5">{footer}</div>
         )}
       </div>
     </div>

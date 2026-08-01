@@ -10,11 +10,12 @@ Teachers publish practical project guides — materials, costs, steps, images, t
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18, Vite, React Router 6, Tailwind CSS, Context API |
-| Backend | Node.js, Express 4 (ESM) |
+| Framework | **Next.js 16** (App Router), React 19 |
+| Styling | Tailwind CSS |
+| API | Next.js route handlers (`app/api/**`) — same process, same origin |
 | Database | **Supabase PostgreSQL** |
 | ORM | Sequelize (models and queries only — schema is owned by SQL migrations) |
-| Auth | JWT (HS256), bcrypt password hashing |
+| Auth | JWT (HS256) Bearer tokens, bcrypt password hashing |
 | AI | Pluggable provider: Gemini, OpenAI, Groq, or OpenRouter |
 | Video | YouTube oEmbed (no API key required) |
 | Scanner | TensorFlow.js + MobileNet, loaded on demand in the browser |
@@ -25,39 +26,44 @@ Teachers publish practical project guides — materials, costs, steps, images, t
 
 ## Project structure
 
+The client and the API are one Next.js application on one port. There is no separate backend server and no dev proxy.
+
 ```
 edubuild/
-├── src/                      # React frontend
-│   ├── components/
-│   │   ├── layout/           # AppShell, NavBar, Footer, LanguageSelector
-│   │   ├── project/          # Cards, materials, steps, video embed
-│   │   ├── forms/            # Field primitives, stepper, repeatable lists
-│   │   ├── admin/            # Moderation queue, review, reject dialog
-│   │   ├── ai/               # Chat panel
-│   │   ├── scanner/          # MobileNet material scanner
-│   │   └── common/           # Button, Card, Modal, EmptyState, …
-│   ├── pages/                # Route components
-│   ├── hooks/                # useProjects, useMobileNet, …
-│   ├── context/              # Auth and Language providers
-│   ├── services/             # API client
-│   └── utils/
-├── backend/
+├── app/                      # Next.js App Router
+│   ├── layout.jsx            # Root layout, fonts, providers
+│   ├── providers.jsx         # Auth / Language / Toast context boundary
+│   ├── globals.css           # Tailwind layers + design primitives
+│   ├── page.jsx              # Home, and one folder per route below
+│   ├── projects/  project/[id]/  submit/  dashboard/
+│   ├── assistant/  scanner/  signin/  signup/  admin/
+│   └── api/                  # Route handlers — the entire HTTP API
+│       ├── auth/  projects/  feedback/  ai/  youtube/  health/
+│       └── [...notFound]/    # JSON 404 for unmatched /api paths
+├── lib/                      # Server-side code
 │   ├── config/               # env loader, Sequelize connection
-│   ├── controllers/          # Request handlers
-│   ├── routes/               # Express routers
-│   ├── middleware/           # auth, validation, rate limits, errors
+│   ├── api/                  # auth, validation, rate limits, error shaping
 │   ├── models/               # Sequelize models
 │   ├── schemas/              # zod request schemas
 │   ├── services/
 │   │   ├── ai/               # Provider abstraction
 │   │   └── youtube/          # URL parsing + oEmbed
-│   ├── scripts/              # Operator CLIs (promoteAdmin, dev helpers)
-│   └── test/                 # node:test unit tests
+│   └── utils/                # crypto, project normalisation
+├── src/                      # Client components
+│   ├── views/                # One component per page
+│   ├── components/           # layout, project, forms, admin, ai, common
+│   ├── hooks/  context/  services/  utils/
+├── scripts/                  # Operator CLIs (promoteAdmin, dev helpers)
+├── test/                     # node:test unit tests
 ├── supabase/
 │   ├── migrations/           # Versioned SQL — the schema source of truth
 │   └── seed.sql              # Sample project data
 └── docs/legacy/              # Archived, historically inaccurate documents
 ```
+
+> `src/views/` is deliberately not named `src/pages/`: Next reserves a top-level
+> `pages/` directory for the older Pages Router, and having both makes the build
+> fail.
 
 ---
 
@@ -80,47 +86,38 @@ Use the transaction pooler on port 6543 only if you deploy to a serverless platf
 Apply the schema:
 
 ```bash
-cd backend
 npx supabase link --project-ref <your-project-ref>
-npx supabase db push
+npm run db:diff          # review the pending changes first
+npm run db:push
 ```
 
-### 2. Backend
-
-```bash
-cd backend
-npm ci
-cp .env.example .env
-# Fill in DATABASE_URL, JWT_SECRET, CLIENT_URL and one AI provider key
-npm run dev
-```
-
-Runs on `http://localhost:5000`.
-
-Generate a strong JWT secret with:
-
-```bash
-openssl rand -base64 48
-```
-
-### 3. Frontend
+### 2. Configure and run
 
 ```bash
 npm ci
-cp .env.example .env
+cp .env.example .env.local
+# Fill in DATABASE_URL, JWT_SECRET and (optionally) one AI provider key
 npm run dev
 ```
 
-Runs on `http://localhost:5173`. The Vite dev server proxies `/api` to the backend, so no CORS configuration is needed in development.
+Runs on **`http://localhost:3000`** — client and API together.
 
-### 4. Create your first admin
+Generate the two secrets with:
+
+```bash
+openssl rand -base64 48   # JWT_SECRET
+openssl rand -base64 32   # SETTINGS_ENCRYPTION_KEY
+```
+
+`.env.local` is gitignored. Never commit it.
+
+### 3. Create your first admin
 
 Every signup creates a regular `user` account — there is no self-service route to admin.
 Register through the UI, then promote yourself:
 
 ```bash
-cd backend
-node scripts/promoteAdmin.js you@example.com
+npm run promote-admin -- you@example.com
 ```
 
 ---
@@ -142,17 +139,22 @@ Projects created by an admin are published immediately. Projects created by a us
 
 ## Environment variables
 
-### `backend/.env`
+All of these live in `.env.local`, which is gitignored. Next loads it automatically.
+
+None of them are `NEXT_PUBLIC_`-prefixed, so none reach the browser: an accidental
+import of server config into a client component fails the build rather than
+leaking a key.
 
 | Variable | Required | Notes |
 |---|---|---|
-| `NODE_ENV` | yes | `development` or `production` |
-| `PORT` | no | Defaults to `5000` |
-| `CLIENT_URL` | in production | CORS allowlist. Comma-separate multiple origins. |
+| `NODE_ENV` | no | Set by `next dev` / `next build` |
+| `PORT` | no | Defaults to `3000` |
+| `CLIENT_URL` | in production | CORS allowlist, for a separate client calling this API. Same-origin requests do not need it. |
 | `DATABASE_URL` | yes\* | Supabase pooled connection string |
 | `SUPABASE_DB_HOST` / `_PORT` / `_NAME` / `_USER` / `_PASSWORD` | yes\* | Alternative to `DATABASE_URL` |
 | `JWT_SECRET` | yes | Minimum 32 characters in production |
 | `JWT_EXPIRES_IN` | no | Defaults to `7d` |
+| `SETTINGS_ENCRYPTION_KEY` | to configure keys in the UI | A 32-byte base64 or hex secret. Generate with `openssl rand -base64 32`; keep it stable so saved provider keys remain decryptable. |
 | `AI_PROVIDER` | no | `gemini` \| `openai` \| `groq` \| `openrouter` \| `mock`. Defaults to `gemini`. |
 | `GEMINI_API_KEY` / `OPENAI_API_KEY` / `GROQ_API_KEY` / `OPENROUTER_API_KEY` | one of | Only the selected provider's key is needed |
 | `GEMINI_MODEL` / `OPENAI_MODEL` / `GROQ_MODEL` / `OPENROUTER_MODEL` | no | Sensible defaults per provider |
@@ -161,15 +163,18 @@ Projects created by an admin are published immediately. Projects created by a us
 
 \* Provide either `DATABASE_URL` or the complete discrete set.
 
-In `NODE_ENV=production` the server **exits at boot** if a required variable is missing, naming the variable but never its value.
+In production a missing required variable **throws at startup**, naming the
+variable but never its value.
 
-### Root `.env` (frontend)
+### Client-visible variables
 
 | Variable | Notes |
 |---|---|
-| `VITE_API_URL` | Defaults to `/api` |
+| `NEXT_PUBLIC_API_URL` | Optional. Defaults to `/api` — same origin, so it is normally unset. |
 
-**Never put an API key in the frontend `.env`.** Every `VITE_`-prefixed variable is inlined into the public JavaScript bundle and is readable by anyone who visits the site. All provider keys are backend-only, and every AI call is proxied through the backend.
+**Never put an API key in a `NEXT_PUBLIC_` variable.** Anything with that prefix
+is inlined into the public JavaScript bundle and readable by every visitor. All
+provider keys are server-only, and every AI call goes through a route handler.
 
 ---
 
@@ -234,7 +239,7 @@ Visibility follows the caller: anonymous requests see approved projects only; a 
 
 ### YouTube video embedding
 
-A teacher pastes a YouTube URL when submitting or editing a project. The backend validates the host, extracts the video ID, and calls YouTube's public **oEmbed** endpoint to fetch the title, channel and thumbnail. **This requires no API key and has no quota cost.**
+A teacher pastes a YouTube URL when submitting or editing a project. The server validates the host, extracts the video ID, and calls YouTube's public **oEmbed** endpoint to fetch the title, channel and thumbnail. **This requires no API key and has no quota cost.**
 
 If oEmbed is unreachable the URL is still accepted and saved — the preview is simply limited to a derived thumbnail. Video pages embed through `youtube-nocookie.com` behind a click-to-load thumbnail, so no YouTube script loads unless a visitor actually plays the video. A "Watch on YouTube" link is always offered as a fallback.
 
@@ -248,6 +253,8 @@ If the selected provider's key is missing, the API returns a clear `503` in prod
 
 Requests are authenticated, rate-limited and length-capped, and every call carries a 20-second timeout. Keys are never sent to the browser and never appear in logs or error responses.
 
+To enable real replies, choose one provider in `.env.local`, set that provider's key, and restart the server. Alternatively, set a stable `SETTINGS_ENCRYPTION_KEY`, sign in as an admin, and add/test the provider key in **AI Settings**; the key is verified before it is saved. Do not use `mock` in production.
+
 ### Material scanner
 
 `/scanner` uses **MobileNet**, a general-purpose image classifier trained on everyday objects. It is *not* a purpose-built waste or materials classifier, so treat its output as a starting suggestion — the UI always lets you correct the detected category before searching.
@@ -259,32 +266,27 @@ TensorFlow.js and the model weights (~17 MB) download **only after you press "St
 ## Development
 
 ```bash
-# Frontend
-npm run dev            # Vite dev server on :5173
+npm run dev            # Next dev server — client + API on :3000
 npm run build          # Production build
-npm run preview        # Serve the production build locally
-
-# Backend
-cd backend
-npm run dev            # node --watch on :5000
-npm start              # Production
+npm start              # Serve the production build
 npm test               # node:test unit tests
 
-# Database
-npx supabase db push            # Apply migrations
-npx supabase db push --dry-run  # Review the diff first
-npx supabase db lint
+npm run db:diff        # Review pending migrations
+npm run db:push        # Apply them
+npm run db:lint
 ```
 
 ---
 
 ## Deployment
 
-1. Provision the Supabase project and run `supabase db push`.
-2. Set every required environment variable on the host. Do not copy `.env` files between machines.
-3. Build the frontend (`npm run build`) and serve `dist/` as static files.
-4. Route `/api` to the Node process, or set `CLIENT_URL` to the frontend origin so CORS permits it.
-5. Run `node scripts/promoteAdmin.js <email>` once to create the first admin.
+1. Provision the Supabase project and run `npm run db:push`.
+2. Set every required environment variable on the host. Do not copy `.env.local` between machines.
+3. `npm run build && npm start` — one process serves the client and the API.
+4. Run `npm run promote-admin -- <email>` once to create the first admin.
+
+Because the client and the API share an origin, there is no proxy to configure
+and no CORS to satisfy in a standard deployment.
 
 ### Authentication caveat
 
@@ -294,10 +296,11 @@ JWTs are currently stored in `localStorage`, which leaves them readable by any s
 
 ## Security
 
-- No secrets are committed. `.env` files are git-ignored; only `.env.example` placeholder files are tracked.
-- All provider API keys live on the backend and are never exposed to the client.
+- No secrets are committed. `.env.local` is git-ignored; only `.env.example` placeholders are tracked.
+- All provider API keys are server-only and never reach the client. Keys saved through the admin UI are encrypted at rest with AES-256-GCM and are only ever returned masked.
 - Passwords are hashed with bcrypt.
-- `helmet`, per-route rate limiting, and zod request validation are applied across the API.
+- A Content-Security-Policy and the other security headers are set in `next.config.mjs`. Fonts are self-hosted via `next/font`, so no third-party font host is permitted.
+- Per-route rate limiting and zod request validation are applied across the API.
 - The database schema is changed only through reviewed migrations; the server never alters it at runtime.
 
 If you find a security issue, please open an issue without including the details of any credential involved.

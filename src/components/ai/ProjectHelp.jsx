@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { getProjectHelp } from '../../services/api';
 import { errorMessage } from '../../api/axios';
 import { useAuth } from '../../context/AuthContext';
@@ -77,13 +79,13 @@ const ProjectHelp = ({ project }) => {
       )}
 
       {explanation && (
-        <div className="mt-4 rounded-lg border border-slate-200 bg-white p-5">
+        <div className="mt-4 rounded-lg border border-surface-line bg-white p-5">
           <p className="prose-guide whitespace-pre-line text-ink">{explanation}</p>
-          <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4">
+          <div className="mt-4 flex items-center gap-3 border-t border-surface-line pt-4">
             <Button variant="ghost" size="sm" onClick={() => setExplanation('')}>
               Close
             </Button>
-            <Link to="/assistant" className="text-sm font-semibold text-brand-700 hover:underline">
+            <Link href="/assistant" className="text-sm font-semibold text-brand-700 hover:underline">
               Ask a follow-up in the assistant
             </Link>
           </div>

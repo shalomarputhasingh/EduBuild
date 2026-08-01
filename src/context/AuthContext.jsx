@@ -1,3 +1,5 @@
+'use client';
+
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 export const AuthContext = createContext(null);
@@ -20,8 +22,25 @@ const readStoredUser = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(readStoredUser);
-  const [token, setToken] = useState(() => localStorage.getItem('token'));
+  /**
+   * State starts empty and is filled in after mount.
+   *
+   * Reading localStorage in the initialiser worked under Vite, where the app
+   * only ever rendered in a browser. Next pre-renders this on the server, where
+   * localStorage does not exist — and even guarded, seeding from storage would
+   * make the server and client render different markup and trip a hydration
+   * mismatch. `ready` lets consumers tell "signed out" apart from "not yet
+   * known", so a page does not flash its signed-out state on every load.
+   */
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setUser(readStoredUser());
+    setToken(localStorage.getItem('token'));
+    setReady(true);
+  }, []);
 
   const login = useCallback((data) => {
     setToken(data.token);
@@ -54,12 +73,13 @@ export const AuthProvider = ({ children }) => {
     () => ({
       user,
       token,
+      ready,
       login,
       logout,
       isAuthenticated: Boolean(token && user),
       isAdmin: user?.role === 'admin',
     }),
-    [user, token, login, logout]
+    [user, token, ready, login, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -5,13 +5,13 @@ import React from 'react';
  * not jump when data arrives.
  */
 export const Skeleton = ({ className = '' }) => (
-  <div className={`relative overflow-hidden rounded bg-slate-200 ${className}`} aria-hidden="true">
+  <div className={`relative overflow-hidden rounded bg-surface-line ${className}`} aria-hidden="true">
     <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent" />
   </div>
 );
 
 export const ProjectCardSkeleton = () => (
-  <div className="overflow-hidden rounded-card border border-slate-200 bg-white shadow-card">
+  <div className="overflow-hidden rounded-card border border-surface-line bg-white shadow-card">
     <Skeleton className="h-44 w-full rounded-none" />
     <div className="space-y-3 p-5">
       <div className="flex gap-2">

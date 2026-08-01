@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 /**
  * The single button in the app.
@@ -10,10 +12,18 @@ import { Link } from 'react-router-dom';
  */
 const VARIANTS = {
   primary: 'bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800 shadow-sm',
-  secondary: 'bg-white text-ink border border-slate-300 hover:bg-slate-50 active:bg-slate-100',
-  ghost: 'bg-transparent text-ink-muted hover:bg-slate-100 hover:text-ink',
+  secondary: 'bg-white text-ink border border-surface-line hover:bg-surface-sunken active:bg-brand-50',
+  ghost: 'bg-transparent text-ink-muted hover:bg-black/[0.04] hover:text-ink',
   danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm',
   subtle: 'bg-brand-50 text-brand-800 hover:bg-brand-100',
+
+  /**
+   * For use on a `.chalkboard` field, where the page's ink tokens are
+   * unreadable. Chalk-white fill with board-green text is the highest contrast
+   * pairing available on that surface.
+   */
+  chalk: 'bg-white text-board hover:bg-brand-50 active:bg-brand-100 shadow-sm',
+  'chalk-outline': 'bg-transparent text-white border border-white/30 hover:bg-white/10 active:bg-white/[0.15]',
 };
 
 const SIZES = {
@@ -69,9 +79,10 @@ const Button = React.forwardRef(function Button(
 
   // Navigation renders as a real anchor so it is keyboard-reachable, focusable,
   // and openable in a new tab — none of which a div with onClick gives you.
+  // The public prop stays `to`; next/link takes `href`.
   if (to) {
     return (
-      <Link ref={ref} to={to} className={classes} {...props}>
+      <Link ref={ref} href={to} className={classes} {...props}>
         {content}
       </Link>
     );

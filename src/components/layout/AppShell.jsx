@@ -1,26 +1,39 @@
 import React from 'react';
 import NavBar from './NavBar';
 
+/**
+ * The board again, closing the page the way the hero opens it. The safety note
+ * lives here rather than in a modal because it applies to every guide on the
+ * site and should be readable without being dismissed.
+ */
 const Footer = () => (
-  <footer className="mt-20 border-t border-slate-200 bg-white">
-    <div className="container-page py-10">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+  <footer className="chalkboard mt-20">
+    <div className="container-page py-14">
+      <div className="grid gap-10 sm:grid-cols-2 sm:gap-8">
         <div className="max-w-sm">
-          <p className="font-extrabold tracking-tight text-ink">EDUBUILD</p>
-          <p className="mt-2 text-sm text-ink-muted">
+          <p className="flex items-center gap-2.5 font-display text-lg font-extrabold tracking-tight text-white">
+            <span
+              className="grid h-8 w-8 place-items-center rounded-md border border-white/25 font-mono text-sm font-medium"
+              aria-hidden="true"
+            >
+              EB
+            </span>
+            EDUBUILD
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-white/70">
             Practical, low-cost STEM project guides for the classroom — written and reviewed by
             teachers.
           </p>
         </div>
-        <div className="text-sm text-ink-muted">
-          <p className="font-semibold text-ink">Safety</p>
-          <p className="mt-2 max-w-xs">
+        <div className="sm:justify-self-end sm:text-right">
+          <p className="eyebrow text-marigold">Safety</p>
+          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70 sm:ml-auto">
             Guides here are written for supervised classroom use. Always review an activity and its
             safety notes before running it with students.
           </p>
         </div>
       </div>
-      <p className="mt-8 border-t border-slate-200 pt-6 text-xs text-ink-subtle">
+      <p className="mt-12 border-t border-board-line pt-6 font-mono text-xs text-white/60">
         &copy; {new Date().getFullYear()} EDUBUILD
       </p>
     </div>

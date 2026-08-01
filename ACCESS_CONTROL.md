@@ -71,11 +71,11 @@ Authorization is enforced on the **backend**, on every request. The frontend hid
 
 | Layer | File | Responsibility |
 |---|---|---|
-| Token verification | `backend/middleware/auth.js` | Rejects a request without a valid JWT; sets `req.userId` and `req.userRole` |
-| Optional token | `backend/middleware/optionalAuth.js` | Populates the same fields when a token is present, but allows anonymous access |
-| Admin gate | `backend/middleware/adminOnly.js` | Rejects anyone whose `req.userRole` is not `admin` |
-| Ownership checks | `backend/controllers/projectController.js` | Compares `project.createdBy` against `req.userId` for edit and delete |
-| Visibility filter | `backend/controllers/projectController.js` | Builds the listing `WHERE` clause from the caller's role |
+| Token verification | `lib/api/auth.js` | `requireAuth` — rejects a request without a valid JWT and returns the caller identity |
+| Optional token | `lib/api/auth.js` | `optionalAuth` — returns identity when a token is present, null otherwise |
+| Admin gate | `lib/api/auth.js` | `requireAdmin` — rejects anyone whose role is not `admin` |
+| Ownership checks | `app/api/projects/[id]/route.js` | Compares `project.createdBy` against the caller id for edit and delete |
+| Visibility filter | `app/api/projects/[id]/route.js` | Visibility clause built from the caller role in `lib/api/projects.js` |
 
 Role comes from the signed JWT payload, not from anything the client sends alongside it.
 

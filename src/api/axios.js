@@ -1,7 +1,17 @@
+'use client';
+
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  /**
+   * Same-origin by default. The API lives at /api on this very server, so a
+   * relative base needs no configuration and works in every environment.
+   *
+   * This read used to be `import.meta.env.VITE_API_URL`, which is Vite-only
+   * syntax and would not compile under Next. NEXT_PUBLIC_ is the equivalent
+   * escape hatch, for the case of a client pointed at a different deployment.
+   */
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 });

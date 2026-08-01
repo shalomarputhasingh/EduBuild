@@ -1,17 +1,24 @@
 import React from 'react';
 
 const TONES = {
-  neutral: 'bg-slate-100 text-slate-700 ring-slate-200',
+  neutral: 'bg-surface-sunken text-ink-muted ring-surface-line',
   brand: 'bg-brand-50 text-brand-800 ring-brand-200',
   info: 'bg-sky-50 text-sky-800 ring-sky-200',
-  warning: 'bg-amber-50 text-amber-900 ring-amber-200',
-  success: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+  warning: 'bg-marigold-soft text-marigold-deep ring-marigold/40',
+  // Filled rather than tinted, so "Published" cannot be mistaken for a subject
+  // tag now that the whole palette is green.
+  success: 'bg-brand-600 text-white ring-brand-600',
   danger: 'bg-red-50 text-red-800 ring-red-200',
 };
 
+/**
+ * Badges are set in the mono face and uppercased, matching the spec strip, so
+ * that everything which classifies a project reads as one family of labels
+ * rather than as decoration.
+ */
 const Badge = ({ tone = 'neutral', className = '', children }) => (
   <span
-    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
+    className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[0.6875rem] font-medium uppercase tracking-wide ring-1 ring-inset ${
       TONES[tone] ?? TONES.neutral
     } ${className}`}
   >

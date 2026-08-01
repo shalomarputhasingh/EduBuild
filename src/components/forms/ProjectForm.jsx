@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import Button from '../common/Button';
 import Badge from '../common/Badge';
@@ -89,7 +91,7 @@ const ProjectForm = ({ initialValues = emptyProject, onSubmit, submitting, submi
                 className={`rounded-lg px-3.5 py-2 text-sm font-medium transition-colors ${
                   s.id === section
                     ? 'bg-brand-600 text-white'
-                    : 'bg-white text-ink-muted ring-1 ring-slate-200 hover:bg-slate-50 hover:text-ink'
+                    : 'bg-white text-ink-muted ring-1 ring-surface-line hover:bg-surface-sunken hover:text-ink'
                 }`}
               >
                 <span className="mr-1.5 opacity-70">{index + 1}</span>
@@ -111,7 +113,7 @@ const ProjectForm = ({ initialValues = emptyProject, onSubmit, submitting, submi
         </div>
       )}
 
-      <div className="rounded-card border border-slate-200 bg-white p-6 shadow-card">
+      <div className="rounded-card border border-surface-line bg-white p-6 shadow-card">
         {/* ─── Basics ─────────────────────────────────────────────────────── */}
         {section === 'basics' && (
           <div className="flex flex-col gap-5">
@@ -380,7 +382,7 @@ const ProjectForm = ({ initialValues = emptyProject, onSubmit, submitting, submi
               <img
                 src={values.image}
                 alt="Cover preview"
-                className="max-h-64 w-full rounded-lg border border-slate-200 object-cover"
+                className="max-h-64 w-full rounded-lg border border-surface-line object-cover"
                 onError={(event) => {
                   event.currentTarget.style.display = 'none';
                 }}
@@ -403,7 +405,7 @@ const ProjectForm = ({ initialValues = emptyProject, onSubmit, submitting, submi
               This is roughly how the guide will read once published.
             </p>
 
-            <div className="rounded-lg border border-slate-200 bg-surface-sunken p-5">
+            <div className="rounded-lg border border-surface-line bg-surface-sunken p-5">
               <div className="mb-3 flex flex-wrap gap-2">
                 <Badge tone="brand">{values.subject}</Badge>
                 <Badge>Class {values.classLevel}</Badge>
@@ -435,28 +437,28 @@ const ProjectForm = ({ initialValues = emptyProject, onSubmit, submitting, submi
               </dl>
 
               {values.description && (
-                <div className="mt-5 border-t border-slate-200 pt-4">
+                <div className="mt-5 border-t border-surface-line pt-4">
                   <h4 className="mb-2 font-semibold text-ink">Overview</h4>
                   <p className="prose-guide whitespace-pre-line">{values.description}</p>
                 </div>
               )}
 
               {previewMaterials.length > 0 && (
-                <div className="mt-5 border-t border-slate-200 pt-4">
+                <div className="mt-5 border-t border-surface-line pt-4">
                   <h4 className="mb-2 font-semibold text-ink">Materials</h4>
                   <MaterialsChecklist materials={previewMaterials} projectId="preview" />
                 </div>
               )}
 
               {previewSteps.length > 0 && (
-                <div className="mt-5 border-t border-slate-200 pt-4">
+                <div className="mt-5 border-t border-surface-line pt-4">
                   <h4 className="mb-3 font-semibold text-ink">Steps</h4>
                   <StepList steps={previewSteps} />
                 </div>
               )}
             </div>
 
-            <p className="mt-5 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm text-ink-muted">
+            <p className="mt-5 rounded-lg border border-surface-line bg-white px-4 py-3 text-sm text-ink-muted">
               A moderator reviews every submission for clarity and classroom safety before it is
               published. You will see the outcome, and any requested changes, on your dashboard.
             </p>

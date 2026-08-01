@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Button from '../common/Button';
 
@@ -40,7 +42,7 @@ const RepeatableList = ({
   return (
     <div className="flex flex-col gap-3">
       {items.length === 0 && emptyHint && (
-        <p className="rounded-lg border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-ink-subtle">
+        <p className="rounded-lg border border-dashed border-surface-line px-4 py-6 text-center text-sm text-ink-subtle">
           {emptyHint}
         </p>
       )}
@@ -48,7 +50,7 @@ const RepeatableList = ({
       {items.map((item, index) => (
         <div
           key={index}
-          className="rounded-lg border border-slate-200 bg-surface-sunken p-4"
+          className="rounded-lg border border-surface-line bg-surface-sunken p-4"
         >
           <div className="mb-3 flex items-center justify-between gap-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">
@@ -60,7 +62,7 @@ const RepeatableList = ({
                 onClick={() => move(index, -1)}
                 disabled={index === 0}
                 aria-label={`Move ${itemLabel.toLowerCase()} ${index + 1} up`}
-                className="rounded p-1.5 text-ink-subtle transition-colors hover:bg-slate-200 hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent"
+                className="tap-target inline-flex items-center justify-center rounded p-1.5 text-ink-subtle transition-colors hover:bg-surface-line hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent"
               >
                 ↑
               </button>
@@ -69,7 +71,7 @@ const RepeatableList = ({
                 onClick={() => move(index, 1)}
                 disabled={index === items.length - 1}
                 aria-label={`Move ${itemLabel.toLowerCase()} ${index + 1} down`}
-                className="rounded p-1.5 text-ink-subtle transition-colors hover:bg-slate-200 hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent"
+                className="tap-target inline-flex items-center justify-center rounded p-1.5 text-ink-subtle transition-colors hover:bg-surface-line hover:text-ink disabled:opacity-30 disabled:hover:bg-transparent"
               >
                 ↓
               </button>
@@ -78,7 +80,7 @@ const RepeatableList = ({
                 onClick={() => remove(index)}
                 disabled={items.length <= min}
                 aria-label={`Remove ${itemLabel.toLowerCase()} ${index + 1}`}
-                className="rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-30 disabled:hover:bg-transparent"
+                className="tap-target inline-flex items-center justify-center rounded p-1.5 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-30 disabled:hover:bg-transparent"
               >
                 ✕
               </button>
@@ -111,7 +113,7 @@ export const StringListInput = ({ items, onChange, placeholder, addLabel, itemLa
         onChange={(e) => update(e.target.value)}
         placeholder={placeholder}
         aria-label={itemLabel}
-        className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle transition-colors hover:border-slate-400 focus:border-brand-600"
+        className="w-full rounded-lg border border-surface-line bg-white px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-subtle transition-colors hover:border-brand-300 focus:border-brand-600"
       />
     )}
   />

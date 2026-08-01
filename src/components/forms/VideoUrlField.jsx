@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useRef, useState } from 'react';
 import { previewVideo } from '../../services/api';
 import { errorMessage } from '../../api/axios';
@@ -81,7 +83,7 @@ const VideoUrlField = ({ value, onChange, error }) => {
       )}
 
       {status === 'ready' && preview && (
-        <div className="mt-3 flex gap-3 rounded-lg border border-slate-200 bg-surface-sunken p-3 sm:gap-4">
+        <div className="mt-3 flex gap-3 rounded-lg border border-surface-line bg-surface-sunken p-3 sm:gap-4">
           {preview.videoThumbnail && (
             <img
               src={preview.videoThumbnail}
