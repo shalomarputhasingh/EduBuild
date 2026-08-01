@@ -11,7 +11,8 @@
     "db:push": "supabase db push",
     "db:diff": "supabase db push --dry-run",
     "db:lint": "supabase db lint",
-    "promote-admin": "node scripts/promoteAdmin.js"
+    "promote-admin": "node scripts/promoteAdmin.js",
+    "seed:projects": "node scripts/seedProjects.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
