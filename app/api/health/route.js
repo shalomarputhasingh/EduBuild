@@ -1,32 +1,83 @@
-import { connectDB } from '@/lib/config/db';
-import { json, route } from '@/lib/api/respond';
-import { providerStatus } from '@/lib/services/ai';
-import { env } from '@/lib/config/env';
+import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export const GET = route(async () => {
-  // Each dependency is probed independently: a database problem must not take
-  // the health endpoint down with it — reporting that is what it exists for.
-  let database = 'ok';
-  try {
-    await connectDB();
-  } catch {
-    database = 'unavailable';
+const value = (name) => {
+  const raw = process.env[name];
+  return typeof raw === 'string' ? raw.trim() : '';
+};
+
+/**
+ * This route deliberately has no top-level imports from the application
+ * configuration or database modules. If production variables are missing or a
+ * server dependency cannot initialize, the health endpoint must still load and
+ * report the failed layer without exposing any environment-variable values.
+ */
+export const GET = async () => {
+  const databaseUrl = value('DATABASE_URL');
+  const hasDiscreteDatabase = Boolean(
+    value('SUPABASE_DB_HOST') &&
+      value('SUPABASE_DB_USER') &&
+      value('SUPABASE_DB_PASSWORD')
+  );
+  const databaseConfigured = Boolean(databaseUrl || hasDiscreteDatabase);
+  const databaseUrlFormat =
+    !databaseUrl
+      ? 'not_set'
+      : /^postgres(?:ql)?:\/\//i.test(databaseUrl)
+        ? 'valid'
+        : 'invalid';
+  const jwtConfigured = value('JWT_SECRET').length >= 32;
+
+  let database = databaseConfigured ? 'unavailable' : 'not_configured';
+  let databaseError = null;
+
+  if (databaseConfigured && jwtConfigured) {
+    try {
+      const { connectDB } = await import('@/lib/config/db');
+      await connectDB();
+      database = 'ok';
+    } catch (error) {
+      databaseError =
+        error?.name === 'SequelizeConnectionError' ||
+        error?.name === 'SequelizeConnectionRefusedError'
+          ? 'connection_failed'
+          : 'initialization_failed';
+    }
   }
 
   let ai = { provider: 'unknown', configured: false };
-  try {
-    ai = await providerStatus();
-  } catch {
-    ai = { provider: 'unknown', configured: false, error: 'unavailable' };
+  if (databaseConfigured && jwtConfigured) {
+    try {
+      const { providerStatus } = await import('@/lib/services/ai');
+      ai = await providerStatus();
+    } catch {
+      ai = { provider: 'unknown', configured: false, error: 'unavailable' };
+    }
   }
 
-  return json({
-    status: database === 'ok' ? 'ok' : 'degraded',
-    environment: env.NODE_ENV,
-    database,
-    ai,
-  });
-});
+  const status =
+    database === 'ok' && jwtConfigured && databaseUrlFormat !== 'invalid'
+      ? 'ok'
+      : 'degraded';
+
+  return NextResponse.json(
+    {
+      status,
+      environment: process.env.NODE_ENV || 'unknown',
+      configuration: {
+        databaseConfigured,
+        databaseUrlFormat,
+        jwtConfigured,
+      },
+      database,
+      ...(databaseError && { databaseError }),
+      ai,
+    },
+    {
+      status: 200,
+      headers: { 'Cache-Control': 'no-store' },
+    }
+  );
+};
