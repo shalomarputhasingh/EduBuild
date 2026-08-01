@@ -95,7 +95,7 @@ npm run db:push
 
 ```bash
 npm ci
-cp .env.example .env.local
+cp .env.example .env
 # Fill in DATABASE_URL, JWT_SECRET and (optionally) one AI provider key
 npm run dev
 ```
@@ -109,7 +109,7 @@ openssl rand -base64 48   # JWT_SECRET
 openssl rand -base64 32   # SETTINGS_ENCRYPTION_KEY
 ```
 
-`.env.local` is gitignored. Never commit it.
+`.env` is gitignored. Never commit it.
 
 ### 3. Create your first admin
 
@@ -139,7 +139,10 @@ Projects created by an admin are published immediately. Projects created by a us
 
 ## Environment variables
 
-All of these live in `.env.local`, which is gitignored. Next loads it automatically.
+For local development, these live in `.env`, which is gitignored and loaded
+automatically by Next. On Vercel, add them under **Project Settings →
+Environment Variables**; deployed functions receive them through `process.env`
+and do not read an uploaded `.env` file.
 
 None of them are `NEXT_PUBLIC_`-prefixed, so none reach the browser: an accidental
 import of server config into a client component fails the build rather than
@@ -253,7 +256,7 @@ If the selected provider's key is missing, the API returns a clear `503` in prod
 
 Requests are authenticated, rate-limited and length-capped, and every call carries a 20-second timeout. Keys are never sent to the browser and never appear in logs or error responses.
 
-To enable real replies, choose one provider in `.env.local`, set that provider's key, and restart the server. Alternatively, set a stable `SETTINGS_ENCRYPTION_KEY`, sign in as an admin, and add/test the provider key in **AI Settings**; the key is verified before it is saved. Do not use `mock` in production.
+To enable real replies, choose one provider in `.env`, set that provider's key, and restart the server. Alternatively, set a stable `SETTINGS_ENCRYPTION_KEY`, sign in as an admin, and add/test the provider key in **AI Settings**; the key is verified before it is saved. Do not use `mock` in production.
 
 ### Material scanner
 
@@ -281,7 +284,10 @@ npm run db:lint
 ## Deployment
 
 1. Provision the Supabase project and run `npm run db:push`.
-2. Set every required environment variable on the host. Do not copy `.env.local` between machines.
+2. Import every required variable into the host's encrypted environment-variable
+   settings. Do not include the local `.env` file in the deployment or repository.
+   On Vercel, select **Production** for these variables and redeploy after changing
+   them; existing deployments do not receive environment-variable updates.
 3. `npm run build && npm start` — one process serves the client and the API.
 4. Run `npm run promote-admin -- <email>` once to create the first admin.
 
@@ -296,7 +302,7 @@ JWTs are currently stored in `localStorage`, which leaves them readable by any s
 
 ## Security
 
-- No secrets are committed. `.env.local` is git-ignored; only `.env.example` placeholders are tracked.
+- No secrets are committed. `.env` is git-ignored; only `.env.example` placeholders are tracked.
 - All provider API keys are server-only and never reach the client. Keys saved through the admin UI are encrypted at rest with AES-256-GCM and are only ever returned masked.
 - Passwords are hashed with bcrypt.
 - A Content-Security-Policy and the other security headers are set in `next.config.mjs`. Fonts are self-hosted via `next/font`, so no third-party font host is permitted.

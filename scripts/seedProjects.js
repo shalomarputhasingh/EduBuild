@@ -14,13 +14,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// This runs outside Next, which is what normally loads .env.local.
+// This runs outside Next, so load the local `.env` file explicitly. Vercel and
+// other hosts inject variables into process.env and do not depend on this file.
 const here = path.dirname(fileURLToPath(import.meta.url));
-const envPath = path.join(here, '..', '.env.local');
+const envPath = path.join(here, '..', '.env');
 if (fs.existsSync(envPath)) {
   for (const line of fs.readFileSync(envPath, 'utf8').split(/\r?\n/)) {
     const match = line.match(/^([A-Z0-9_]+)=(.*)$/);
-    if (match && !process.env[match[1]]) process.env[match[1]] = match[2].trim();
+    if (match && !process.env[match[1]]) {
+      const value = match[2].trim();
+      const isQuoted =
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"));
+      process.env[match[1]] = isQuoted ? value.slice(1, -1) : value;
+    }
   }
 }
 
