@@ -32,6 +32,8 @@ export const GET = async () => {
 
   let database = databaseConfigured ? 'unavailable' : 'not_configured';
   let databaseError = null;
+  let databaseErrorType = null;
+  let databaseErrorCode = null;
 
   if (databaseConfigured && jwtConfigured) {
     try {
@@ -39,9 +41,15 @@ export const GET = async () => {
       await connectDB();
       database = 'ok';
     } catch (error) {
+      databaseErrorType =
+        typeof error?.name === 'string' ? error.name.slice(0, 80) : 'Error';
+      const code = error?.original?.code || error?.parent?.code || error?.code;
+      databaseErrorCode =
+        typeof code === 'string' && /^[A-Z0-9_]+$/.test(code)
+          ? code.slice(0, 40)
+          : null;
       databaseError =
-        error?.name === 'SequelizeConnectionError' ||
-        error?.name === 'SequelizeConnectionRefusedError'
+        databaseErrorType.startsWith('Sequelize')
           ? 'connection_failed'
           : 'initialization_failed';
     }
@@ -73,6 +81,8 @@ export const GET = async () => {
       },
       database,
       ...(databaseError && { databaseError }),
+      ...(databaseErrorType && { databaseErrorType }),
+      ...(databaseErrorCode && { databaseErrorCode }),
       ai,
     },
     {
